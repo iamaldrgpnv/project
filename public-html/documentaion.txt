@@ -1,0 +1,163 @@
+"Патерн проектирования MVC"
+"Структура проекта:"
+1. site.com/account/login --> index.php(Router)
+(Сайт отправляет запрос, чтобы мы перешли на страницу входа, логина)
+(Запрос переходит в index.php , в mvc все запросы отправляются в один файл, одна точка входа)
+(В index.php подключается класс роутер) 
+(Роутер понимает, что был получен запрос, разделяет запрос на controller и action)
+
+
+												Models/account.php
+															|
+                                             |
+2. index.php(Router)->AccountController.php->loginAction.php->страница входа
+                                             |
+															|
+												View/login.php	(html для конкретного action)
+(AccountController - class, loginAction - method)														
+(Action - loginAccount - метод, к-й будет вызван в AccountController)
+(В action подключается view-html и model)
+
+"Структура папок"
+public html (Корневая папка)
+	application/
+					config/
+							routes.php (Маршруты)
+							db.php (Файл конфигурации к базе данных)
+
+					controllers/ (Все контроллеры наследуют core/Controller.php)
+							AccountController.php
+							AdminController.php
+							NewsController.php 
+
+					core/ (Все основные классы)
+							Router.php
+							Controller.php (Родитель всех контроллеров)
+							Model.php (Родитель всех моделей)
+							View.php
+
+					lib/ (Классы для работы с БД)
+							Db.php
+
+
+					models/ (Все модели наследуют core/Model.php)
+							Account.php
+							Admin.php
+							News.php 
+
+					views/ 
+							layouts/ (Шаблоны для страниц)
+									default.php
+									admin.php
+
+							account/ (контроллер для класса)
+									login.php (Виды для каждого action)
+									register.php
+
+							news/ (контроллер для класса)
+									show.php
+									list.php
+
+							admin/ (контроллер для класса)	
+									login.php
+									users.php
+
+	public/	
+			images/ (дизайн)	
+			styles/
+			scripts/
+			fonts/
+
+	.htaccess
+
+	index.php
+
+3. Настройка .htaccess
+<IfModule mod_rewrite.c>
+AddDefaultCharset utf-8 "Добавили стандартную кодировку"
+RewriteEngine On "Включение содуля конфигураций"
+RewriteCond %{REQUEST_FILENAME}% !-f "Если это не файл"
+RewriteCond %{REQUEST_FILENAME}% !-d "Если это не дирректория"
+
+RewriteRule ^(.*)$ index.php [L,QSA] "Перенаправляем в index.php"
+</IfModule>
+
+4. application/lib/Dev.php
+(На время разработки создаем дебагер)
+
+ini_set('display_errors', 1); (Вкл вывод ошибок на экран)
+error_reporting(E_ALL); (Отчет об всех ошибках)
+(Выводит абсолютно все замечания)
+
+function debug($str){
+	echo '<pre>';
+	var_dump($str);
+	echo '</pre>';
+	exit;
+}
+
+
+5. index.php 
+(session_start(); - для отлова файлов куки)
+
+6. application/config/routes.php 
+(Массив со страницами, заранее прописываем логику)
+return [
+	'account/login' => [
+		'controller' => 'account';
+		'action' => 'login',
+	],
+	'news/show' => [
+		'controller' => 'account',
+		'action' => 'login',
+	],
+];
+
+7. Routes 
+class Router
+{
+	protected $routes = []; (Массив маршрутов)
+	protected $params = [];
+
+	function __construct()
+	{
+		$arr = require_once 'application/config/routes.php';
+		foreach ($arr as $key => $value) {
+			$this->add($key, $value); (Передаем переменные)
+		}
+	}
+	public function add($route, $params) // добавление маршрута
+	{
+		$route = '#^' . $route .  '$#'; (Преобразуем в регулярное выражение)
+		$this->routes[$route] = $params; (Передаем в массив)
+	}
+	public function match() // проверка маршрута
+	{
+	}
+	public function run() // запуск роутера
+	{
+		echo 'start';
+	}
+}
+(Конструктор вызывает метод add и передает переменные)
+(Переменные идут из массива $arr)
+(В методе add )
+
+(То есть мы сделали двойную "проверку" перед тем, как загрухить данные в массивы)
+()
+
+
+
+
+Core - Основной класс
+В нем хранятся классы-родители
+
+View 
+path - путь к нашему виду
+layout - шаблон
+
+В чем отличие 
+Шаблон - метатеги, ссылки...
+
+
+Класс рендер будет загружать шаблон и сам вид

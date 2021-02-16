@@ -1,0 +1,12 @@
+{
+	"name": "alexander/public-html",
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"application\\core\\": "application/core/",
+			"application\\lib\\": "application/lib/",
+			"application\\config\\": "application/config/",
+			"application\\controllers\\": "application/controllers"
+		}
+	}
+}
